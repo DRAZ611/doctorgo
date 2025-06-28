@@ -1,0 +1,178 @@
+{
+    "title": "Quest 01: System Fundamentals",
+    "exercises": [
+        {
+            "id": "introduction",
+            "title": "Introduction: Unix Command Reference",
+            "completed": true,
+            "instructions": "Before starting the challenge, here’s a detailed guide to Unix commands that may help you solve this task. These commands are essential for file manipulation and text processing in a Linux/Unix environment.",
+            "sections": [
+                {
+                    "title": "1. curl",
+                    "content": "<strong>Purpose</strong>: Transfers data to/from servers (HTTP/HTTPS, FTP, etc.). Commonly used for fetching web pages or APIs.<br><strong>Key Options</strong>:<ul><li><code>-o/-O</code>: Save output to a file.</li><li><code>-X</code>: Specify HTTP method (e.g., GET, POST).</li><li><code>-s</code>: Silent mode.</li><li><code>-L</code>: Follow redirects.</li></ul>",
+                    "code": "curl https://example.com # Fetch webpage"
+                },
+                {
+                    "title": "2. touch",
+                    "content": "<strong>Purpose</strong>: Creates empty files or updates file timestamps.",
+                    "code": "touch file.txt # Create file"
+                },
+                {
+                    "title": "3. chmod",
+                    "content": "<strong>Purpose</strong>: Changes file/directory permissions.",
+                    "code": "chmod 755 script.sh # Owner: rwx, others: rx"
+                },
+                {
+                    "title": "4. find",
+                    "content": "<strong>Purpose</strong>: Searches for files by name, size, or time.",
+                    "code": "find . -name \"*.txt\" # Find .txt files"
+                },
+                {
+                    "title": "5. grep",
+                    "content": "<strong>Purpose</strong>: Searches for text patterns within files or output.",
+                    "code": "grep \"error\" log.txt # Search for the word \"error\""
+                },
+                {
+                    "title": "6. sed",
+                    "content": "<strong>Purpose</strong>: Stream editor for text transformations.",
+                    "code": "sed 's/old/new/g' file.txt # Replace text"
+                },
+                {
+                    "title": "7. jq",
+                    "content": "<strong>Purpose</strong>: A powerful tool for processing JSON data.",
+                    "code": "jq '.' file.json # Pretty-print a JSON file"
+                },
+                {
+                    "title": "8. wc",
+                    "content": "<strong>Purpose</strong>: Counts lines, words, or characters.",
+                    "code": "wc -l file.txt # Count lines"
+                },
+                {
+                    "title": "9. tr",
+                    "content": "<strong>Purpose</strong>: Translates or deletes characters.",
+                    "code": "echo \"hello\" | tr 'a-z' 'A-Z' # Uppercase"
+                }
+            ]
+        },
+        {
+            "id": "make-it-perfect",
+            "title": "make-it-perfect",
+            "completed": true,
+            "instructions": "Create the files, directories, and symbolic links so that when you run the command below, the output will exactly match the expected result:",
+            "usage": "$ TZ=utc ls -l --time-style='+%F %T' | sed 1d | awk '{print $1, $6, $7, $8, $9, $10, $11}'",
+            "output": "drwx--S--T 1960-01-01 00:00:00 X\n-rwS--x--x 1970-12-25 06:06:06 Y\n-r--r--r-- 1999-08-01 09:09:09 Z\nlrwxrwxrwx 2000-01-01 00:00:01 L1 -> Z\nlrwxrwxrwx 2001-01-01 00:00:02 L2 -> L1\n-r-sr-xr-x 2025-12-31 23:59:59 A\ndrwxrwx--T 2030-01-01 01:01:01 B",
+            "notes": "On macOS, you must install GNU Core Utilities and use 'gls' instead of 'ls'.\nThe symbolic links (L1 and L2) must point exactly as shown (L1 → Z, L2 → L1).\nPermissions must include special bits like setuid, setgid, and sticky.",
+            "submission": "Once your setup is correct, archive all the created items into a file called 'perfect.tar' using the following command:\n$ tar -cf perfect.tar *"
+        },
+        {
+            "id": "hero-of-the-day",
+            "title": "🦸‍♂️ hero-of-the-day",
+            "completed": false,
+            "instructions": "Write a script named 'hero-of-the-day.sh' that fetches and displays the name, intelligence, and alignment of the superhero with id: 70 from the open SuperHero API.",
+            "usage": "bash hero-of-the-day.sh",
+            "output": "Batman\\n100\\ngood",
+            "notes": "You must not hardcode the output. Use tools like 'curl' and 'jq' to extract the fields from the API endpoint: https://akabab.github.io/superhero-api/api/id/70.json",
+            "submission": "hero-of-the-day.sh"
+        },
+        {
+            "id": "who-are-you-really",
+            "title": "🕵️ who-are-you-really",
+            "completed": false,
+            "instructions": "You wake up in a hidden research facility. You don't remember anything. On your wrist, a digital screen blinks with only one message: Subject ID: 666... You must find out who you are. Create a file named who-are-you-really.sh that reveals only your name, based on your subject ID.",
+            "usage": "./who-are-you-really.sh | cat -e",
+            "output": "\"The Darkness\"$",
+            "notes": "Use the API endpoint: https://akabab.github.io/superhero-api/api/all.json. You must extract only the name of the superhero with id == 666. The output must include the quotes and a trailing newline.",
+            "submission": "who-are-you-really.sh"
+        },
+        {
+            "id": "cl-campX",
+            "title": "⚔️ cl-campX",
+            "completed": false,
+            "instructions": "Inside a file named clMaster, write a single command line that will:\n- List only the files and directories in the current directory (no recursion).\n- Ignore hidden files, as well as . and ..\n- Display the names separated by commas only (no spaces or newlines).\n- Sort them by descending last modification time (most recently modified first).\n- Add a / at the end of directory names only.",
+            "usage": "bash -c \"$(cat clMaster)\"",
+            "output": "file1,folder1/,script.sh",
+            "notes": "Do not use 'ls' directly for sorting or formatting. Use GNU tools only (find, stat, sort, awk, sed, etc.).",
+            "submission": "clMaster"
+        },
+        {
+            "id": "cl-campX2",
+            "title": "🧠 cl-campX2",
+            "completed": false,
+            "instructions": "Create a file called 'power', which displays exactly the following when executed with the cat command: P⚡$",
+            "usage": "cat -e power",
+            "output": "P⚡$",
+            "notes": "The file must contain the uppercase letter P, followed immediately by the Unicode character ⚡ (U+26A1), followed by a newline. No extra lines or spaces.",
+            "submission": "power"
+        },
+        {
+            "id": "cl-huntX",
+            "title": "🎯 cl-huntX",
+            "completed": false,
+            "instructions": "Create an executable file named 'seek' that recursively searches the current directory for:\n- Directories whose name starts with a capital letter from A to M.\n- Files that contain a digit in the middle of their name (e.g., doc3.txt, a9z, but not 3start).\n- Symbolic links that point to a file ending in .sh.",
+            "usage": "./seek",
+            "output": "Ateam\\nMgroup\\ndocs/file9.txt\\nsrc/script5.py\\nlink_to_script.sh",
+            "notes": "The script must print all matching paths, one per line, relative to the current directory. Use only 'find' and other standard Unix tools.",
+            "submission": "seek"
+        },
+        {
+            "id": "cl-lineageX",
+            "title": "🧬 cl-lineageX",
+            "completed": false,
+            "instructions": "Create a script file named 'mylineage.sh' that will retrieve and print the 'relatives' of a superhero. The script must use the environment variable 'HERO_ID' to determine which hero to look up from the API.",
+            "usage": "export HERO_ID=1\n./mylineage.sh",
+            "output": "Marlo Chandler-Jones (wife); Polly (aunt); Mrs. Chandler (mother-in-law); Keith Chandler, Ray Chandler, three unidentified others (brothers-in-law); unidentified father (deceased); Jackie Shorr (alleged mother; unconfirmed)",
+            "notes": "Use the API endpoint: https://akabab.github.io/superhero-api/api/all.json. If a hero has no relatives listed, print 'Unknown'. Do not include surrounding quotes in the output.",
+            "submission": "mylineage.sh"
+        },
+        {
+            "id": "cl-visionX",
+            "title": "👁️ cl-visionX",
+            "completed": false,
+            "instructions": "Create a script named 'deeplook.sh' which searches the current directory and subfolders for all files (not directories) that end with '.go', but not '.test.go'.",
+            "usage": "./deeplook.sh | cat -e",
+            "output": "utils$\\nmain$\\nhello$",
+            "notes": "The output must show only the base name (without the path and .go extension), sorted in reverse alphabetical order. Each line must be terminated by a '$' (visible with 'cat -e').",
+            "submission": "deeplook.sh"
+        },
+        {
+            "id": "cl-inventoryX",
+            "title": "📦 cl-inventoryX",
+            "completed": false,
+            "instructions": "Create a file called 'deepcount.sh', which will print only a single number, representing the total count of: Regular files, Directories, Symbolic links, and Named pipes (FIFOs) in the current directory and all its subfolders.",
+            "usage": "./deepcount.sh | cat -e",
+            "output": "27$",
+            "notes": "The output must be just the number, followed by a newline. You may not use 'ls' for this task.",
+            "submission": "deepcount.sh"
+        },
+        {
+            "id": "cl-precisionX",
+            "title": "🧩 cl-precisionX",
+            "completed": false,
+            "instructions": "Create a file named exactly: `💣\"~\\`'$User!*^'Go|Hard'?\"💥`\nAnd it must contain only the text `42`.",
+            "usage": "cat \"�\\\"~\\\\\\`'\\$User!\\*\\^'Go|Hard'\\?\\\"💥\"",
+            "output": "42",
+            "notes": "The file must contain exactly two characters: 4 and 2, with no newlines. You must escape all special characters properly to create and read the file from the shell.",
+            "submission": "💣\"~\\`'$User!*^'Go|Hard'?\"💥"
+        },
+        {
+            "id": "cl-skipX",
+            "title": "🛠️ cl-skipX",
+            "completed": false,
+            "instructions": "Write a single-line command inside a file named 'filterls.sh' that executes 'ls -la' and skips every third line of the output, starting from the second line.",
+            "usage": "bash filterls.sh",
+            "output": "total 12\\ndrwxr-xr-x  4 user user  4096 Jun 22 16:00 .\\n-rw-r--r--  1 user user     0 Jun 22 15:59 file1\\n-rw-r--r--  1 user user     0 Jun 22 15:59 file3",
+            "notes": "Use only one of the following: 'awk', 'sed', or 'paste'. Preserve the original formatting of 'ls -la'.",
+            "submission": "filterls.sh"
+        },
+        {
+            "id": "now-decrypt-this",
+            "title": "💥 now-decrypt-this",
+            "completed": false,
+            "instructions": "A system meltdown occurred. Logs were scrambled. Clone the repository 'https://github.com/01-edu/the-final-cl-test'. Inside 'the-final-cl-test/enc/logs/final.log' lies the name of the only survivor. Create a script 'decrypt_survivor.sh' to find it.",
+            "usage": "bash decrypt_survivor.sh | cat -e",
+            "output": "Alice$",
+            "notes": "The survivor's name is the second word on the 100th line from the bottom of the file. The script must not hardcode the name.",
+            "submission": "decrypt_survivor.sh"
+        }
+    ]
+}

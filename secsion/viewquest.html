@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quest View - DOCTORAZ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #020412;
+            --bg-sidebar: #080A1A;
+            --bg-card: #0F1223;
+            --border-color: #212640;
+            --border-glow: #3A407C;
+            --text-primary: #EAF0FF;
+            --text-secondary: #C0C8E0;
+            --text-muted: #7A84A0;
+            --accent-cyan: #00E5FF;
+            --accent-purple: #9E56FF;
+            --accent-green: #3BFFAB;
+            --accent-yellow: #FFC700;
+            --accent-red: #FF4757;
+            --active-bg: rgba(158, 86, 255, 0.15);
+        }
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text-primary); 
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .prose { color: var(--text-secondary); line-height: 1.8; }
+        .prose h1 { color: #ffffff; font-size: 2.25rem; font-weight: 900; }
+        .prose h3 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-glow); color: var(--accent-cyan); }
+        .prose code { color: var(--accent-yellow); background-color: rgba(255, 199, 0, 0.1); padding: 0.25em 0.5em; border-radius: 6px; font-family: 'JetBrains Mono', monospace; border: 1px solid rgba(255, 199, 0, 0.2); font-size: 0.9em; }
+        .terminal-block { background-color: #0F1223; border: 1px solid var(--border-color); border-radius: 0.75rem; overflow: hidden; margin-top: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .block-header { display: flex; justify-content: space-between; align-items: center; background-color: #151930; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border-color); }
+        .block-header span { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+        .block-content { padding: 1.25rem; font-family: 'JetBrains Mono', monospace; background-color: transparent; }
+        .sidebar { background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .exercise-item { border-left: 4px solid transparent; border-right: none; transition: all 0.3s ease; }
+        .exercise-item:hover { background-color: var(--active-bg); transform: translateX(4px); }
+        .exercise-item.active { background-color: var(--active-bg); border-left-color: var(--accent-purple); }
+        .exercise-item.active span, .exercise-item.active i { color: #ffffff; font-weight: 600; }
+        .top-bar { background-color: rgba(8, 10, 26, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(2, 4, 18, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.visible { opacity: 1; }
+        .modal-content { background: var(--bg-card); border: 1px solid var(--border-glow); border-radius: 1rem; padding: 2.5rem; text-align: center; transform: scale(0.9); transition: transform 0.3s ease; }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        @media (max-width: 1023px) { .sidebar.is-hidden { transform: translateX(-100%); } }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-accent-green text-black font-bold py-3 px-6 rounded-lg shadow-lg z-50"></div>
+    
+    <!-- Quest Completion Modal -->
+    <div id="quest-complete-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <i data-lucide="party-popper" class="w-24 h-24 mx-auto text-accent-yellow"></i>
+            <h2 class="text-3xl font-black mt-4 text-white">Quest Complete!</h2>
+            <p class="text-text-secondary mt-2 mb-6">Congratulations! You have mastered all exercises in this quest.</p>
+            <a href="../index.html" class="inline-flex bg-accent-purple text-white font-semibold py-3 px-8 rounded-md items-center gap-2 hover:brightness-125 transition">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                <span>Back to Home</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="h-screen flex flex-col">
+        <!-- Top Bar -->
+        <header class="top-bar h-16 flex-shrink-0 px-4 sm:px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                 <button id="sidebar-toggle" class="p-2 rounded-md hover:bg-bg-card text-text-secondary hover:text-white lg:hidden">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="hidden sm:block text-lg font-bold">
+                    <span class="text-text-muted">DOCTORAZ /</span>
+                    <span id="breadcrumb" class="text-white">...</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                 <div class="hidden md:flex items-center gap-3 text-sm">
+                    <span id="progress-text" class="text-text-secondary">0/0 exercises completed</span>
+                    <div class="w-40 bg-bg-card rounded-full h-2.5 border border-border-color p-0.5">
+                        <div id="progress-bar" class="bg-gradient-to-r from-accent-cyan to-accent-purple h-full rounded-full origin-left transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                 <a href="../index.html" class="hidden sm:inline-flex bg-accent-purple text-white font-semibold py-2 px-4 rounded-md items-center gap-2 hover:brightness-125 transition">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    <span>Go Home</span>
+                </a>
+                <div class="w-10 h-10 bg-gradient-to-br from-accent-cyan to-accent-purple rounded-full flex items-center justify-center font-bold">DR</div>
+            </div>
+        </header>
+
+        <div class="flex flex-grow overflow-hidden relative">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="sidebar w-72 absolute lg:relative inset-y-0 left-0 z-30 transform -translate-x-full lg:translate-x-0 flex-shrink-0 flex flex-col is-hidden lg:is-visible">
+                 <div class="p-4 border-b border-border-color">
+                    <h2 id="quest-title" class="text-xl font-bold text-white">Loading...</h2>
+                </div>
+                <div class="p-3">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted"></i>
+                        <input type="text" id="search-input" placeholder="Search..." class="rounded-md w-full pl-10 pr-4 py-2 text-white focus:outline-none transition-colors">
+                    </div>
+                </div>
+                <nav class="flex-grow p-2 overflow-y-auto">
+                    <ul id="exercise-list" class="space-y-1"></ul>
+                </nav>
+                 <div class="p-4 border-t border-border-color text-sm text-text-muted flex items-center gap-2">
+                    <i data-lucide="activity" class="text-accent-green"></i>
+                    <span>System Status: Online</span>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main id="main-content" class="flex-grow p-6 sm:p-8 overflow-y-auto w-full">
+                 <div id="exercise-content" class="max-w-5xl mx-auto">
+                    <!-- Content will be injected here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const PROGRESS_STORAGE_KEY = 'doctotrg_progress';
+
+        class QuestView {
+            constructor() {
+                this.questData = null;
+                this.currentExerciseIndex = 0;
+                this.fetchAndInitialize();
+            }
+
+            fetchAndInitialize() {
+                const contentContainer = document.getElementById("exercise-content");
+                const urlParams = new URLSearchParams(window.location.search);
+                const questId = urlParams.get('quest');
+                
+                if (!questId) {
+                    this.displayError("Error: Quest ID not specified in URL. Please add `?quest=quest01` to the link.");
+                    return;
+                }
+                
+                contentContainer.innerHTML = `<div class="text-center p-16"><p class="text-xl text-text-muted">Loading Quest Data...</p></div>`;
+                // Assumes JSON files are in ../map/data/ relative to this HTML file
+                const jsonFileName = `../map/data/${questId}.json`;
+
+                fetch(jsonFileName)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Quest file not found: ${jsonFileName}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        this.questData = data;
+                        this.processQuestData(questId);
+                        this.loadProgress();
+                        this.initUI();
+                    })
+                    .catch(error => {
+                        console.error('Failed to load quest data:', error);
+                        this.displayError(`Error: Could not load the quest. ${error.message}`);
+                    });
+            }
+            
+            displayError(message) {
+                const contentContainer = document.getElementById("exercise-content");
+                contentContainer.innerHTML = `<div class="text-center p-16"><p class="text-xl text-accent-red">${message}</p></div>`;
+            }
+
+            initUI() {
+                document.getElementById("breadcrumb").textContent = this.questData.title || "Quest";
+                this.renderQuestList();
+                this.renderExercise(0);
+                this.updateTopBarProgress();
+                this.setupEventListeners();
+                lucide.createIcons();
+            }
+            
+            processQuestData(questId) {
+                // Ensure each exercise has a globally unique ID for progress tracking
+                if (this.questData.content && this.questData.content.exercises) {
+                    this.questData.exercises = this.questData.content.exercises.map(ex => ({
+                        ...ex,
+                        id: `quest-${questId}-${ex.id}`
+                    }));
+                } else {
+                    this.questData.exercises = [];
+                }
+            }
+
+            loadProgress() {
+                try {
+                    const saved = localStorage.getItem(PROGRESS_STORAGE_KEY);
+                    const progress = saved ? JSON.parse(saved) : {};
+                    this.questData.exercises.forEach(ex => {
+                        ex.completed = !!progress[ex.id];
+                    });
+                } catch (e) {
+                    console.error("Failed to load progress", e);
+                }
+            }
+
+            saveProgress(itemId) {
+                 try {
+                    const saved = localStorage.getItem(PROGRESS_STORAGE_KEY);
+                    const progress = saved ? JSON.parse(saved) : {};
+                    progress[itemId] = true;
+                    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+                } catch (e) {
+                    console.error("Failed to save progress", e);
+                }
+            }
+            
+            renderQuestList() {
+                document.getElementById("quest-title").textContent = this.questData.title;
+                const exerciseList = document.getElementById("exercise-list");
+                exerciseList.innerHTML = ''; 
+                this.questData.exercises.forEach((ex, index) => {
+                    const li = document.createElement("li");
+                    const statusIcon = ex.completed 
+                        ? `<i data-lucide="check-circle-2" class="w-5 h-5 text-accent-green flex-shrink-0"></i>` 
+                        : `<i data-lucide="circle" class="w-5 h-5 text-text-muted flex-shrink-0"></i>`;
+                    li.className = `exercise-item flex items-center gap-3 p-2.5 px-3 cursor-pointer rounded-md`;
+                    li.dataset.index = index;
+                    li.innerHTML = `${statusIcon}<span class="flex-1 truncate text-text-secondary">${ex.title}</span>`;
+                    exerciseList.appendChild(li);
+                });
+                lucide.createIcons();
+            }
+
+            createContentBlock(title, content, lang = 'bash', titleColor = 'text-accent-cyan') {
+                if (!content) return '';
+                const uniqueId = `code-${Math.random().toString(16).slice(2)}`;
+                const formattedContent = String(content).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const codeBlock = `<div class="terminal-block"><div class="block-header"><span>${lang}</span><button onclick="questView.copyCode(this, '${uniqueId}')" class="p-2 text-text-muted hover:text-white transition-colors" title="Copy Code"><i data-lucide="copy" class="w-4 h-4"></i></button></div><pre><code id="${uniqueId}" class="language-${lang} block-content text-sm">${formattedContent}</code></pre></div>`;
+                return `<div class="prose max-w-none"><h3 class="${titleColor}">${title}</h3>${codeBlock}</div>`;
+            }
+
+            renderExercise(index) {
+                if (!this.questData || !this.questData.exercises || this.questData.exercises.length === 0) {
+                    this.displayError("This quest has no exercises.");
+                    return;
+                }
+                
+                this.currentExerciseIndex = index;
+                document.querySelectorAll(".exercise-item").forEach(item => item.classList.remove("active"));
+                const activeItem = document.querySelector(`.exercise-item[data-index='${index}']`);
+                if (activeItem) activeItem.classList.add("active");
+
+                const ex = this.questData.exercises[index];
+                const contentContainer = document.getElementById("exercise-content");
+                
+                const completeButton = `<button onclick="questView.markAsComplete()" class="bg-accent-green text-black font-bold py-3 px-8 rounded-md shadow-lg hover:bg-green-400 transition transform hover:scale-105 flex items-center gap-2"><i data-lucide="check" class="w-5 h-5"></i><span>Mark as Complete</span></button>`;
+                const nextButton = `<button onclick="questView.goToNextExercise()" class="bg-accent-purple text-white font-bold py-3 px-8 rounded-md shadow-lg hover:bg-purple-500 transition transform hover:scale-105 flex items-center gap-2"><span>Next Exercise</span><i data-lucide="arrow-right" class="w-5 h-5"></i></button>`;
+                const completedMessage = `<div class="bg-green-500/10 text-accent-green font-semibold flex items-center gap-3 rounded-lg p-4"><i data-lucide="award" class="w-6 h-6"></i><span>Exercise Completed! Well done.</span></div>`;
+
+                let contentHTML = `<div class="flex justify-between items-start mb-4"><div class="prose"><h1>${ex.title}</h1></div>${ex.completed ? completedMessage : ''}</div>`;
+                
+                if (ex.instructions) {
+                    contentHTML += `<div class="prose max-w-none">${ex.instructions.replace(/\n/g, '<br/>')}</div>`;
+                }
+
+                if (ex.sections) {
+                    ex.sections.forEach(sec => {
+                        contentHTML += `<div class="prose max-w-none"><h3 class="text-accent-yellow">${sec.title}</h3>${sec.content}</div>`;
+                        contentHTML += this.createContentBlock('Example', sec.code, 'shell');
+                    });
+                } else {
+                    contentHTML += this.createContentBlock('Usage', ex.usage, 'shell', 'text-accent-purple');
+                    contentHTML += this.createContentBlock('Expected Output', ex.output, 'text', 'text-accent-green');
+                    contentHTML += this.createContentBlock('Notes', ex.notes, 'text', 'text-accent-yellow');
+                    contentHTML += this.createContentBlock('Submission File', ex.submission, 'text', 'text-accent-red');
+                }
+                
+                contentHTML += `<div class="mt-12 flex justify-center items-center gap-4">`;
+                if (!ex.completed) {
+                    contentHTML += completeButton;
+                } else if (this.currentExerciseIndex < this.questData.exercises.length - 1) {
+                    contentHTML += nextButton;
+                }
+                contentHTML += `</div>`;
+                
+                contentContainer.innerHTML = contentHTML;
+                contentContainer.scrollTop = 0;
+                document.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+                lucide.createIcons();
+            }
+            
+            updateTopBarProgress() {
+                const completedCount = this.questData.exercises.filter(ex => ex.completed).length;
+                const totalCount = this.questData.exercises.length;
+                const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+                
+                document.getElementById('progress-text').textContent = `${completedCount}/${totalCount} exercises completed`;
+                const progressBar = document.getElementById('progress-bar');
+                progressBar.style.width = `${percentage}%`;
+            }
+
+            markAsComplete() {
+                const exercise = this.questData.exercises[this.currentExerciseIndex];
+                if (!exercise.completed) {
+                    exercise.completed = true;
+                    this.saveProgress(exercise.id);
+                    this.renderQuestList();
+                    this.renderExercise(this.currentExerciseIndex);
+                    this.updateTopBarProgress();
+                    this.showToast(`Congratulations! You completed: ${exercise.title}`);
+
+                    const allCompleted = this.questData.exercises.every(ex => ex.completed);
+                    if (allCompleted) {
+                        this.showQuestCompleteModal();
+                    }
+                }
+            }
+            
+            goToNextExercise() {
+                if (this.currentExerciseIndex < this.questData.exercises.length - 1) {
+                    this.renderExercise(this.currentExerciseIndex + 1);
+                }
+            }
+
+            showQuestCompleteModal() {
+                const modal = document.getElementById('quest-complete-modal');
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('visible'), 10);
+                lucide.createIcons();
+            }
+
+            setupEventListeners() {
+                const sidebar = document.getElementById('sidebar');
+                const toggleBtn = document.getElementById('sidebar-toggle');
+                
+                toggleBtn.addEventListener('click', () => {
+                   sidebar.classList.toggle('is-hidden');
+                   sidebar.classList.toggle('-translate-x-full');
+                });
+                
+                document.getElementById("exercise-list").addEventListener("click", (e) => {
+                    const item = e.target.closest(".exercise-item");
+                    if (item && this.questData) {
+                        this.renderExercise(parseInt(item.dataset.index));
+                        if (window.innerWidth < 1024) { 
+                           sidebar.classList.add('is-hidden', '-translate-x-full');
+                        }
+                    }
+                });
+            }
+
+            copyCode(buttonElement, elementId) {
+                const codeElement = document.getElementById(elementId);
+                navigator.clipboard.writeText(codeElement.textContent).then(() => this.showToast('Code copied!'));
+            }
+            
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 3000);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            window.questView = new QuestView();
+        });
+    </script>
+</body>
+</html>
